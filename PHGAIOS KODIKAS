@@ -1,0 +1,128 @@
+MAIN:
+
+int main() {
+    srand(time(NULL));  // Αρχικοποίηση
+    arxikopoihsh();     // κατάλογος προϊόντων
+    epeksergasia_server();   // εξυπηρέτηση παραγγελιών
+
+    ekthposh_anaforas();     // Εκτύπωση αναφοράς
+
+    return 0;
+}
+
+
+STRUCT no.1 PRODUCTS:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+
+#define ar_pr 20
+#define ar_pel 5
+#define ar_par 10
+// Δομή Προϊόντων
+typedef struct {
+    char perigrafi[100];
+    float timh;
+    int pl_pr;
+} Proionta;
+// Κατάλογος προϊόντων
+Proionta katalogos[ar_pr];
+// αρχικοποίηση καταλόγου
+void arxikopoihsh() {
+    for (int i = 0; i < ar_pr; i++) {
+        sprintf(katalogos[i].perigrafi, "Proionta %d", i + 1);
+        katalogos[i].timh = (rand() % 100) + 1;  // Τιμή προϊόντος από 1 εώς 100
+        katalogos[i].pl_pr = 2;  // 2 τεμάχια για κάθε προϊόν
+    }
+}
+
+
+STRUCT no.2 PIPES:
+
+typedef struct {
+    int pros_server[2];  // Pipe πελάτη-server
+    int apo_server[2]; // Pipe server-πελάτη
+} PipesPelatwn;
+// Κλείσιμο pipes
+void close_pipes(PipesPelatwn *pipes) {
+    close(pipes->pros_server[0]);
+    close(pipes->pros_server[1]);
+    close(pipes->apo_server[0]);
+    close(pipes->apo_server[1]);
+}
+
+
+ORDERS:
+
+void epeks_paragkelias(PipesPelatwn *pipes, int kwdikos_pr, int kwdikos_pel) {
+    // Παράδειγμα επεξεργασίας παραγγελίας
+    if (kwdikos_pr < 0 || kwdikos_pr >= ar_pr) {
+        // Λανθασμένη παραγγελία
+        write(pipes->apo_server[1], "Lathos kwdikos proiontos", 18);
+        return;
+    }
+    Proionta *proionta = &katalogos[kwdikos_pr];
+    // Εξυπηρέτηση εφόσον υπάρχει διαθέσιμο απόθεμα
+    if (proionta->pl_pr > 0) {
+        proionta->pl_pr--;  // Μείωση διαθέσιμου αποθέματος
+        char apanthsh[256];
+        sprintf(apanthsh, "EPITYXHS PARAGKELIA GIA:%s, SYNOLO: %.2f", proionta->perigrafi, proionta->timh);
+        write(pipes->apo_server[1], apanthsh, strlen(apanthsh) + 1);
+    } else {
+        write(pipes->apo_server[1], "proionta mh diathesima", 21);
+    }
+}
+
+void epeksergasia_server() {
+    PipesPelatwn pipes[ar_pel];
+    // Αρχικοποίηση pipes για πελάτες
+    for (int i = 0; i < ar_pel; i++) {
+        pipe(pipes[i].pros_server);
+        pipe(pipes[i].apo_server);
+    }
+    // Εξυπηρέτηση των παραγγελιών
+    for (int i = 0; i < ar_pel; i++) {
+        if (fork() == 0) { 
+            close_pipes(&pipes[i]);
+            for (int j = 0; j < ar_par; j++) {
+                int kwdikos_pr = rand() % ar_pr;  // Επιλογή τυχαίου προϊόντος
+                write(pipes[i].pros_server[1], &kwdikos_pr, sizeof(int));  // Αποστολή παραγγελίας
+                char apanthsh[256];
+                read(pipes[i].apo_server[0], apanthsh, sizeof(apanthsh)); 
+                printf("Client %d: %s\n", i + 1, apanthsh);
+                sleep(1);  // Αναμονή μεταξύ παραγγελιών
+            }
+            exit(0);
+        }
+    }
+
+    // Αναμονή για λήξη διεργασιών
+    for (int i = 0; i < ar_pel; i++) {
+        wait(NULL);
+    }
+}
+
+
+PRINTS:
+
+void ekthposh_anaforas() {
+    int sinol_pr = 0;
+    int epit_pr = 0;
+    int apot_pr = 0;
+    float sinol_eispr = 0;
+
+    for (int i = 0; i < ar_pr; i++) {
+        printf("Product: %s\n", katalogos[i].perigrafh);
+        printf("Requests: %d\n", katalogos[i].pl_pr); 
+        printf("Sold: %d\n", 2 - katalogos[i].pl_pr); 
+        printf("\n");
+    }
+//Εκτύπωση στοιχείων
+    printf("SINOLIKES PARAGKELIES: %d\n", sinol_pr);
+    printf("EPITYXEIS PARAGKELIES: %d\n", epit_pr);
+    printf("APOTYXHMENES PARAGKELIES: %d\n", apot_pr);
+    printf("SYNOLIKES EISPRAKSEIS: %.2f\n", sinol_eispr);
+}
