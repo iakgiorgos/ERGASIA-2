@@ -1,15 +1,3 @@
-MAIN:
-
-int main() {
-    srand(time(NULL));  // Αρχικοποίηση
-    arxikopoihsh();     // κατάλογος προϊόντων
-    epeksergasia_server();   // εξυπηρέτηση παραγγελιών
-
-    ekthposh_anaforas();     // Εκτύπωση αναφοράς
-
-    return 0;
-}
-
 
 STRUCT no.1 PRODUCTS:
 
@@ -125,4 +113,16 @@ void ekthposh_anaforas() {
     printf("EPITYXEIS PARAGKELIES: %d\n", epit_pr);
     printf("APOTYXHMENES PARAGKELIES: %d\n", apot_pr);
     printf("SYNOLIKES EISPRAKSEIS: %.2f\n", sinol_eispr);
+}
+
+MAIN:
+
+int main() {
+    srand(time(NULL));  // Αρχικοποίηση
+    arxikopoihsh();     // κατάλογος προϊόντων
+    epeksergasia_server();   // εξυπηρέτηση παραγγελιών
+
+    ekthposh_anaforas();     // Εκτύπωση αναφοράς
+
+    return 0;
 }
